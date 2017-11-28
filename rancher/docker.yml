@@ -1,0 +1,38 @@
+---
+- name: installation docker
+  hosts: docker
+  remote_user: root
+  tasks:
+
+          - name: installation de curl et wget
+            apt: name={{ item }} update_cache=yes
+            with_items:
+              - curl
+              - wget
+
+          - name: installation des dépendances
+            apt: name={{ item }} update_cache=yes
+            with_items:
+              - dirmngr
+              - python-dev
+              - python-setuptools
+
+          - name: installation de pip
+            easy_install: name=pip
+
+          - name: installation de docker-py
+            pip: name=docker-py state=present
+
+          - name: update && upgrade && apt-transport
+            shell: "apt-get update && apt-get upgrade -y && apt-get install apt-transport-https ca-certificates -y"
+
+          - name: ajout repo dans source list
+            shell: sh -c "echo deb https://apt.dockerproject.org/repo debian-jessie main > /etc/apt/sources.list.d/docker.list"
+
+          - name: ajout de la clé
+            shell: "apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D"
+
+
+          - name: demarrage docker
+            apt:
+              name: docker-engine=17.03.1~ce-0~debian-jessie
